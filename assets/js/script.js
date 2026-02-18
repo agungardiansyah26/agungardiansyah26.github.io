@@ -105,10 +105,14 @@ function updateContent(lang) {
   // Update toggle state
   if (lang === "id") {
     langIdBtn.classList.add("active-lang");
+    langIdBtn.setAttribute("aria-pressed", "true");
     langEnBtn.classList.remove("active-lang");
+    langEnBtn.setAttribute("aria-pressed", "false");
   } else {
     langEnBtn.classList.add("active-lang");
+    langEnBtn.setAttribute("aria-pressed", "true");
     langIdBtn.classList.remove("active-lang");
+    langIdBtn.setAttribute("aria-pressed", "false");
   }
 
   // Save preference
