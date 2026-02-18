@@ -178,6 +178,35 @@ main {
     background: var(--bg-alt);
 }
 
+/* Language Toggle */
+.lang-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.lang-option {
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.lang-option:hover {
+    color: var(--text-main);
+}
+
+.lang-option.active-lang {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.lang-divider {
+    color: var(--border-subtle);
+    font-size: 11px;
+}
+
 .theme-toggle {
     background: transparent;
     border: 1px solid transparent;

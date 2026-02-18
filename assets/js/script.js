@@ -72,3 +72,54 @@ themeToggle.addEventListener("click", () => {
   // Save preference
   localStorage.setItem("theme", isLight ? "light" : "dark");
 });
+
+// Language Toggle
+const langIdBtn = document.getElementById("lang-id");
+const langEnBtn = document.getElementById("lang-en");
+
+function getNestedTranslation(obj, path) {
+  return path.split('.').reduce((prev, curr) => {
+    return prev ? prev[curr] : null;
+  }, obj);
+}
+
+function updateContent(lang) {
+  // Update text content
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    const key = element.getAttribute("data-i18n");
+    const translation = getNestedTranslation(translations[lang], key);
+    if (translation) {
+      element.innerHTML = translation;
+    }
+  });
+
+  // Update placeholders
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    const key = element.getAttribute("data-i18n-placeholder");
+    const translation = getNestedTranslation(translations[lang], key);
+    if (translation) {
+      element.placeholder = translation;
+    }
+  });
+
+  // Update toggle state
+  if (lang === "id") {
+    langIdBtn.classList.add("active-lang");
+    langEnBtn.classList.remove("active-lang");
+  } else {
+    langEnBtn.classList.add("active-lang");
+    langIdBtn.classList.remove("active-lang");
+  }
+
+  // Save preference
+  localStorage.setItem("lang", lang);
+  document.documentElement.lang = lang;
+}
+
+// Initial Load
+const savedLang = localStorage.getItem("lang") || "id";
+updateContent(savedLang);
+
+// Event Listeners
+langIdBtn.addEventListener("click", () => updateContent("id"));
+langEnBtn.addEventListener("click", () => updateContent("en"));
