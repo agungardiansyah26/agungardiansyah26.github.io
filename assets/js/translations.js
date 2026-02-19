@@ -1,6 +1,7 @@
 const translations = {
   "id": {
     "nav": {
+      "skip_to_content": "Lanjut ke konten utama",
       "projects": "Proyek",
       "games": "Game",
       "teaching": "Teaching",
@@ -158,6 +159,7 @@ const translations = {
   },
   "en": {
     "nav": {
+      "skip_to_content": "Skip to main content",
       "projects": "Projects",
       "games": "Games",
       "teaching": "Teaching",
