@@ -435,18 +435,19 @@
 
         <!-- Contact Form -->
         <article class="content-card">
+          <!-- Security Enhancement: Added maxlength to prevent DoS via large payload submissions -->
           <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="contact-form">
             <div class="form-group">
               <label for="name" class="form-label" data-i18n="contact.form.name_label">Nama</label>
-              <input type="text" id="name" name="name" class="input-field" placeholder="Nama Anda" data-i18n-placeholder="contact.form.name_placeholder" required>
+              <input type="text" id="name" name="name" class="input-field" placeholder="Nama Anda" data-i18n-placeholder="contact.form.name_placeholder" required maxlength="100">
             </div>
             <div class="form-group">
               <label for="email" class="form-label" data-i18n="contact.form.email_label">Email</label>
-              <input type="email" id="email" name="email" class="input-field" placeholder="email@contoh.com" data-i18n-placeholder="contact.form.email_placeholder" required>
+              <input type="email" id="email" name="email" class="input-field" placeholder="email@contoh.com" data-i18n-placeholder="contact.form.email_placeholder" required maxlength="100">
             </div>
             <div class="form-group">
               <label for="message" class="form-label" data-i18n="contact.form.message_label">Pesan</label>
-              <textarea id="message" name="message" class="input-field" placeholder="Tulis pesan Anda di sini..." data-i18n-placeholder="contact.form.message_placeholder" required></textarea>
+              <textarea id="message" name="message" class="input-field" placeholder="Tulis pesan Anda di sini..." data-i18n-placeholder="contact.form.message_placeholder" required maxlength="5000"></textarea>
             </div>
             <button type="submit" class="btn-primary" style="justify-content: center;">
               <span data-i18n="contact.form.btn_send">Kirim Pesan</span>
