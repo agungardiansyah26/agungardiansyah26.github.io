@@ -26,6 +26,34 @@
     --shadow-subtle: 0 4px 12px rgba(148, 163, 184, 0.1);
 }
 
+/* Skip Link */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 16px;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 12px 20px;
+    z-index: 100;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    font-weight: 600;
+    font-size: 14px;
+    transition: top 0.2s cubic-bezier(0.2, 0, 0, 1);
+    box-shadow: var(--shadow-soft);
+    text-decoration: none;
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: 2px solid var(--text-main);
+    outline-offset: -2px;
+}
+
+#main-content {
+    scroll-margin-top: 100px;
+    outline: none;
+}
+
 /* Light Mode Specific Overrides */
 .light-mode body {
     background: radial-gradient(circle at top, #e0f2fe 0, #f8fafc 60%, #fff 100%);
