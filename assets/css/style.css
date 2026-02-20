@@ -265,6 +265,23 @@ main {
     background: var(--accent-soft);
 }
 
+/* Theme Icons */
+#sun-icon {
+    display: block;
+}
+
+#moon-icon {
+    display: none;
+}
+
+.light-mode #sun-icon {
+    display: none;
+}
+
+.light-mode #moon-icon {
+    display: block;
+}
+
 @media (max-width: 640px) {
     .nav-inner {
         flex-direction: column;
