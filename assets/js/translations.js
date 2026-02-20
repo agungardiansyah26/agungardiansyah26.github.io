@@ -149,7 +149,10 @@ const translations = {
         "email_placeholder": "email@contoh.com",
         "message_label": "Pesan",
         "message_placeholder": "Tulis pesan Anda di sini...",
-        "btn_send": "Kirim Pesan"
+        "btn_send": "Kirim Pesan",
+        "btn_sending": "Mengirim...",
+        "success_msg": "Pesan terkirim! Terima kasih.",
+        "error_msg": "Gagal mengirim. Silakan coba lagi."
       }
     },
     "footer": {
@@ -307,7 +310,10 @@ const translations = {
         "email_placeholder": "email@example.com",
         "message_label": "Message",
         "message_placeholder": "Write your message here...",
-        "btn_send": "Send Message"
+        "btn_send": "Send Message",
+        "btn_sending": "Sending...",
+        "success_msg": "Message sent! Thank you.",
+        "error_msg": "Failed to send. Please try again."
       }
     },
     "footer": {
