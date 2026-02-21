@@ -163,13 +163,22 @@ if (contactForm) {
 const backToTopBtn = document.getElementById("back-to-top");
 
 if (backToTopBtn) {
+  let isScrolling = false;
+
+  // Performance: Throttling scroll event using requestAnimationFrame
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 300) {
-      backToTopBtn.classList.add("active");
-    } else {
-      backToTopBtn.classList.remove("active");
+    if (!isScrolling) {
+      window.requestAnimationFrame(() => {
+        if (window.scrollY > 300) {
+          backToTopBtn.classList.add("active");
+        } else {
+          backToTopBtn.classList.remove("active");
+        }
+        isScrolling = false;
+      });
+      isScrolling = true;
     }
-  });
+  }, { passive: true });
 
   backToTopBtn.addEventListener("click", () => {
     window.scrollTo({
