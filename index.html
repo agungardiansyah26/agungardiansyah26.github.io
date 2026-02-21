@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action https://formspree.io; object-src 'none'; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://formspree.io; form-action https://formspree.io; object-src 'none'; base-uri 'self';">
   <title>Agung Ardiansyah · Educator & Developer</title>
   <meta name="description" content="Electronics & coding educator, Python & web developer, game and IoT enthusiast. Mengajar, membangun proyek, dan berbagi lewat konten edukatif." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -452,6 +452,7 @@
               <span data-i18n="contact.form.btn_send">Kirim Pesan</span>
               <span class="btn-icon">✈</span>
             </button>
+            <div id="form-status" role="status" aria-live="polite" style="margin-top: 10px; font-size: 14px; min-height: 20px;"></div>
           </form>
         </article>
       </div>
