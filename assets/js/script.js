@@ -110,3 +110,71 @@ updateContent(savedLang);
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
 langEnBtn.addEventListener("click", () => updateContent("en"));
+
+// Async Contact Form Submission
+const contactForm = document.querySelector('.contact-form');
+if (contactForm) {
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = contactForm.querySelector('button[type="submit"]');
+    const btnTextSpan = btn.querySelector('[data-i18n="contact.form.btn_send"]');
+    const statusDiv = document.getElementById('form-status');
+
+    // Get current language
+    const currentLang = localStorage.getItem("lang") || "id";
+
+    // Helper to get translation text
+    const t = (key) => getNestedTranslation(translations[currentLang], key);
+
+    // Loading State
+    btn.disabled = true;
+    if (btnTextSpan) btnTextSpan.textContent = t('contact.form.btn_sending');
+    statusDiv.textContent = '';
+    statusDiv.style.color = '';
+
+    try {
+      const formData = new FormData(contactForm);
+      const response = await fetch(contactForm.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        // Success
+        contactForm.reset();
+        statusDiv.textContent = t('contact.form.success_msg');
+        statusDiv.style.color = 'var(--accent)';
+      } else {
+        throw new Error('Form submission failed');
+      }
+    } catch (error) {
+      // Error
+      statusDiv.textContent = t('contact.form.error_msg');
+      statusDiv.style.color = '#ef4444'; // Red color for error
+    } finally {
+      // Reset button
+      btn.disabled = false;
+      if (btnTextSpan) btnTextSpan.textContent = t('contact.form.btn_send');
+    }
+  });
+}
+// Back to Top Button
+const backToTopBtn = document.getElementById("back-to-top");
+
+if (backToTopBtn) {
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 300) {
+      backToTopBtn.classList.add("active");
+    } else {
+      backToTopBtn.classList.remove("active");
+    }
+  });
+
+  backToTopBtn.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+}

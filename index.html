@@ -14,7 +14,8 @@
       } catch (e) {}
     })();
   </script>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action https://formspree.io; object-src 'none'; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://formspree.io; form-action https://formspree.io; object-src 'none'; base-uri 'self';">
+
   <title>Agung Ardiansyah · Educator & Developer</title>
   <meta name="description" content="Electronics & coding educator, Python & web developer, game and IoT enthusiast. Mengajar, membangun proyek, dan berbagi lewat konten edukatif." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -446,23 +447,25 @@
 
         <!-- Contact Form -->
         <article class="content-card">
+          <!-- Security Enhancement: Added maxlength to prevent DoS via large payload submissions -->
           <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="contact-form">
             <div class="form-group">
               <label for="name" class="form-label" data-i18n="contact.form.name_label">Nama</label>
-              <input type="text" id="name" name="name" class="input-field" placeholder="Nama Anda" data-i18n-placeholder="contact.form.name_placeholder" required>
+              <input type="text" id="name" name="name" class="input-field" placeholder="Nama Anda" data-i18n-placeholder="contact.form.name_placeholder" required maxlength="100">
             </div>
             <div class="form-group">
               <label for="email" class="form-label" data-i18n="contact.form.email_label">Email</label>
-              <input type="email" id="email" name="email" class="input-field" placeholder="email@contoh.com" data-i18n-placeholder="contact.form.email_placeholder" required>
+              <input type="email" id="email" name="email" class="input-field" placeholder="email@contoh.com" data-i18n-placeholder="contact.form.email_placeholder" required maxlength="100">
             </div>
             <div class="form-group">
               <label for="message" class="form-label" data-i18n="contact.form.message_label">Pesan</label>
-              <textarea id="message" name="message" class="input-field" placeholder="Tulis pesan Anda di sini..." data-i18n-placeholder="contact.form.message_placeholder" required></textarea>
+              <textarea id="message" name="message" class="input-field" placeholder="Tulis pesan Anda di sini..." data-i18n-placeholder="contact.form.message_placeholder" required maxlength="5000"></textarea>
             </div>
             <button type="submit" class="btn-primary" style="justify-content: center;">
               <span data-i18n="contact.form.btn_send">Kirim Pesan</span>
               <span class="btn-icon">✈</span>
             </button>
+            <div id="form-status" role="status" aria-live="polite" style="margin-top: 10px; font-size: 14px; min-height: 20px;"></div>
           </form>
         </article>
       </div>
@@ -477,6 +480,12 @@
       </div>
     </footer>
   </main>
+
+  <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
 
   <script src="assets/js/translations.js"></script>
   <script src="assets/js/script.js"></script>
