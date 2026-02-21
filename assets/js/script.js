@@ -47,27 +47,10 @@ sections.forEach((section) => navObserver.observe(section));
 
 // Theme Toggle
 const themeToggle = document.getElementById("theme-toggle");
-const body = document.body;
-const sunIcon = document.getElementById("sun-icon");
-const moonIcon = document.getElementById("moon-icon");
-
-// Check for saved theme preference or system preference
-const savedTheme = localStorage.getItem("theme");
-const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-if (savedTheme === "light" || (!savedTheme && !systemPrefersDark)) {
-  body.classList.add("light-mode");
-  sunIcon.style.display = "none";
-  moonIcon.style.display = "block";
-}
 
 themeToggle.addEventListener("click", () => {
-  body.classList.toggle("light-mode");
-  const isLight = body.classList.contains("light-mode");
-  
-  // Update icons
-  sunIcon.style.display = isLight ? "none" : "block";
-  moonIcon.style.display = isLight ? "block" : "none";
+  document.documentElement.classList.toggle("light-mode");
+  const isLight = document.documentElement.classList.contains("light-mode");
 
   // Save preference
   localStorage.setItem("theme", isLight ? "light" : "dark");
