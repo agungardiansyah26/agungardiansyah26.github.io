@@ -48,12 +48,30 @@ sections.forEach((section) => navObserver.observe(section));
 // Theme Toggle
 const themeToggle = document.getElementById("theme-toggle");
 
+function updateThemeLabel() {
+  const isLight = document.documentElement.classList.contains("light-mode");
+  const currentLang = localStorage.getItem("lang") || "id";
+  const t = translations[currentLang];
+
+  if (t && t.theme) {
+    // If currently light, next action is to switch to dark.
+    const labelKey = isLight ? "to_dark" : "to_light";
+    const labelText = t.theme[labelKey];
+
+    if (labelText) {
+      themeToggle.setAttribute("aria-label", labelText);
+      themeToggle.setAttribute("title", labelText);
+    }
+  }
+}
+
 themeToggle.addEventListener("click", () => {
   document.documentElement.classList.toggle("light-mode");
   const isLight = document.documentElement.classList.contains("light-mode");
 
   // Save preference
   localStorage.setItem("theme", isLight ? "light" : "dark");
+  updateThemeLabel();
 });
 
 // Language Toggle
@@ -101,6 +119,7 @@ function updateContent(lang) {
   // Save preference
   localStorage.setItem("lang", lang);
   document.documentElement.lang = lang;
+  updateThemeLabel();
 }
 
 // Initial Load

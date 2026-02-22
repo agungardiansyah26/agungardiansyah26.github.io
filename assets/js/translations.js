@@ -8,6 +8,10 @@ const translations = {
       "about": "Profil",
       "contact": "Kontak"
     },
+    "theme": {
+      "to_light": "Ganti ke Mode Terang",
+      "to_dark": "Ganti ke Mode Gelap"
+    },
     "hero": {
       "pill_text": "Medan · Indonesia · Educator & Developer",
       "title": "Saya membangun pengalaman belajar dan proyek teknis<br /><span class=\"hero-highlight\">dengan Python, web, game, dan elektronika.</span>",
@@ -168,6 +172,10 @@ const translations = {
       "teaching": "Teaching",
       "about": "Profile",
       "contact": "Contact"
+    },
+    "theme": {
+      "to_light": "Switch to Light Mode",
+      "to_dark": "Switch to Dark Mode"
     },
     "hero": {
       "pill_text": "Medan · Indonesia · Educator & Developer",
