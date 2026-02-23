@@ -19,3 +19,7 @@
 ## 2024-05-24 - Dynamic ARIA Labels for Toggles
 **Learning:** Static `aria-label` ("Toggle Theme") is insufficient for state toggles. Users need to know the *current state* or the *next action* (e.g., "Switch to Light Mode").
 **Action:** Use JavaScript to update `aria-label` (and `title`) dynamically based on state and current language.
+
+## 2024-05-25 - Global Focus Styles & Transitions
+**Learning:** Elements with CSS transitions on `all` properties (e.g., `transition: all 0.18s`) will animate the `outline` property when focus styles are applied, causing a delay in visibility and potential testing issues.
+**Action:** Always implement a global `:focus-visible` fallback (e.g., `outline: 2px solid var(--accent)`) to ensure all interactive elements have a high-contrast focus indicator, and be aware of transition effects when verifying focus behavior programmatically.
