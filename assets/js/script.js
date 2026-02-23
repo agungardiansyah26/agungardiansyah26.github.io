@@ -84,13 +84,43 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P'];
+  const allowedAttrs = ['class'];
+
+  // Iterate over all elements in the body
+  const allElements = doc.body.querySelectorAll('*');
+  allElements.forEach(el => {
+    // If element has been removed by parent replacement, skip
+    if (!doc.body.contains(el)) return;
+
+    if (!allowedTags.includes(el.tagName)) {
+      // Replace with text content if not allowed (e.g. <script>, <img>, <a>)
+      // This neutralizes the element while keeping text
+      const text = document.createTextNode(el.textContent);
+      el.parentNode.replaceChild(text, el);
+    } else {
+      // Remove disallowed attributes
+      Array.from(el.attributes).forEach(attr => {
+        if (!allowedAttrs.includes(attr.name)) {
+          el.removeAttribute(attr.name);
+        }
+      });
+    }
+  });
+
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
