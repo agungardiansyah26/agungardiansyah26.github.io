@@ -84,13 +84,56 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P'];
+  const clean = document.createDocumentFragment();
+
+  function sanitize(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return document.createTextNode(node.textContent);
+    }
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (allowedTags.includes(node.tagName)) {
+        const newEl = document.createElement(node.tagName);
+        if (node.hasAttribute('class')) {
+          newEl.setAttribute('class', node.getAttribute('class'));
+        }
+        Array.from(node.childNodes).forEach((child) => {
+          const cleanChild = sanitize(child);
+          if (cleanChild) newEl.appendChild(cleanChild);
+        });
+        return newEl;
+      } else {
+        const fragment = document.createDocumentFragment();
+        Array.from(node.childNodes).forEach((child) => {
+          const cleanChild = sanitize(child);
+          if (cleanChild) fragment.appendChild(cleanChild);
+        });
+        return fragment;
+      }
+    }
+    return null;
+  }
+
+  Array.from(doc.body.childNodes).forEach((node) => {
+    const cleanNode = sanitize(node);
+    if (cleanNode) clean.appendChild(cleanNode);
+  });
+
+  const div = document.createElement('div');
+  div.appendChild(clean);
+  return div.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
