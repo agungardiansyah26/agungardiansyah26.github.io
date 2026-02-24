@@ -5,3 +5,7 @@
 ## 2026-02-23 - [Scroll Performance Optimization]
 **Learning:** Attaching scroll event listeners directly to the window without throttling causes excessive function calls and layout thrashing, especially on high-refresh-rate displays.
 **Action:** Use `requestAnimationFrame` to throttle scroll handlers for visual updates, ensuring logic runs at most once per frame. Use `{ passive: true }` to allow the browser to optimize scrolling.
+
+## 2026-02-24 - [Redundant DOM Hydration]
+**Learning:** Re-running DOM updates (e.g., translation logic) on initial load when the content already matches the static HTML wastes main thread time.
+**Action:** Check if the user's preference matches the default static language/theme before executing hydration logic, skipping expensive operations if they are redundant.

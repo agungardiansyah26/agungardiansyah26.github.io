@@ -124,7 +124,13 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+// Optimize: Skip redundant DOM updates if saved language matches the default static HTML ('id')
+if (savedLang === "id") {
+  // Ensure theme label is localized (e.g. "Ganti ke Mode Gelap")
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
