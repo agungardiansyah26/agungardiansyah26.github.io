@@ -54,6 +54,16 @@
     outline: none;
 }
 
+/* Global Focus Styles */
+.nav-link:focus-visible,
+.btn-primary:focus-visible,
+.btn-ghost:focus-visible,
+.project-link:focus-visible,
+.footer-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* Light Mode Specific Overrides */
 .light-mode body {
     background: radial-gradient(circle at top, #e0f2fe 0, #f8fafc 60%, #fff 100%);
