@@ -22,19 +22,29 @@ revealElements.forEach((el) => revealObserver.observe(el));
 
 // Active Navigation Link
 const sections = document.querySelectorAll("section[id]");
-const navLinks = document.querySelectorAll(".nav-link");
+
+// Optimization: Map section IDs to nav links for O(1) lookup
+const navLinkMap = new Map();
+document.querySelectorAll(".nav-link").forEach(link => {
+  navLinkMap.set(link.getAttribute("href"), link);
+});
+let currentActiveNav = null;
 
 const navObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
+        const newActiveNav = navLinkMap.get(`#${id}`);
+
+        if (newActiveNav && newActiveNav !== currentActiveNav) {
+          // Optimization: Only update classes if the active link changes
+          if (currentActiveNav) {
+            currentActiveNav.classList.remove("active");
           }
-        });
+          newActiveNav.classList.add("active");
+          currentActiveNav = newActiveNav;
+        }
       }
     });
   },
