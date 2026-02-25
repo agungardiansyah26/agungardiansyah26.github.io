@@ -84,13 +84,42 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(str) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(str, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P'];
+  const allowedAttrs = ['class'];
+
+  function clean(node) {
+    const childNodes = Array.from(node.childNodes);
+    childNodes.forEach(child => {
+      if (child.nodeType === 1) { // Element
+        if (!allowedTags.includes(child.tagName)) {
+           const text = document.createTextNode(child.textContent);
+           child.replaceWith(text);
+        } else {
+          Array.from(child.attributes).forEach(attr => {
+            if (!allowedAttrs.includes(attr.name)) {
+              child.removeAttribute(attr.name);
+            }
+          });
+          clean(child);
+        }
+      }
+    });
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
