@@ -24,17 +24,42 @@ revealElements.forEach((el) => revealObserver.observe(el));
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(".nav-link");
 
+// Optimization: Use a Map for O(1) lookup of nav links by section ID
+const sectionLinkMap = new Map();
+navLinks.forEach((link) => {
+  const href = link.getAttribute("href");
+  if (href && href.startsWith("#")) {
+    const id = href.substring(1);
+    sectionLinkMap.set(id, link);
+  }
+});
+
+let currentActiveLink = document.querySelector(".nav-link.active");
+
 const navObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
+        const newActiveLink = sectionLinkMap.get(id);
+
+        if (newActiveLink) {
+          if (newActiveLink !== currentActiveLink) {
+            // Remove active class from the previous link
+            if (currentActiveLink) {
+              currentActiveLink.classList.remove("active");
+            }
+            // Add active class to the new link
+            newActiveLink.classList.add("active");
+            currentActiveLink = newActiveLink;
           }
-        });
+        } else {
+          // If the section has no corresponding link, clear the active state
+          if (currentActiveLink) {
+            currentActiveLink.classList.remove("active");
+            currentActiveLink = null;
+          }
+        }
       }
     });
   },
