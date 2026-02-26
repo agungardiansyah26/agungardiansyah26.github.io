@@ -84,13 +84,53 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(str) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(str, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P'];
+  const allowedAttrs = ['class'];
+
+  function clean(node) {
+    const parent = node.parentNode;
+    if (node.nodeType === 1) { // Element
+      // Recursively clean children FIRST (bottom-up sanitization)
+      // We iterate backwards or use Array.from to handle live collections correctly
+      Array.from(node.childNodes).forEach(child => clean(child));
+
+      if (!allowedTags.includes(node.tagName)) {
+        // If tag is not allowed, replace with its children (which are already cleaned)
+        while (node.firstChild) {
+          parent.insertBefore(node.firstChild, node);
+        }
+        parent.removeChild(node);
+      } else {
+        // If tag is allowed, strip unsafe attributes
+        Array.from(node.attributes).forEach(attr => {
+          if (!allowedAttrs.includes(attr.name)) {
+            node.removeAttribute(attr.name);
+          }
+        });
+      }
+    } else if (node.nodeType === 3) {
+      // Text node - safe
+    } else {
+      // Other node types (comments, etc) - remove
+      parent.removeChild(node);
+    }
+  }
+
+  // Clean the body of the parsed document
+  Array.from(doc.body.childNodes).forEach(node => clean(node));
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
@@ -99,7 +139,8 @@ function updateContent(lang) {
     const key = element.getAttribute("data-i18n-placeholder");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.placeholder = translation;
+      // Strip all tags for placeholders since they only support text
+      element.placeholder = sanitizeHTML(translation).replace(/<[^>]*>/g, '');
     }
   });
 
