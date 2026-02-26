@@ -19,3 +19,7 @@
 ## 2024-05-24 - Dynamic ARIA Labels for Toggles
 **Learning:** Static `aria-label` ("Toggle Theme") is insufficient for state toggles. Users need to know the *current state* or the *next action* (e.g., "Switch to Light Mode").
 **Action:** Use JavaScript to update `aria-label` (and `title`) dynamically based on state and current language.
+
+## 2024-05-25 - Global Focus Styles vs Default Outlines
+**Learning:** Default browser focus outlines are inconsistent and often insufficient for accessibility, especially on dark/custom themes. Custom element styles (e.g., `outline: none` on inputs) can remove vital indicators if not replaced.
+**Action:** Implement a global `:focus-visible` rule with `outline-offset` to ensure consistent, highly visible focus indicators across all interactive elements without interfering with mouse users.
