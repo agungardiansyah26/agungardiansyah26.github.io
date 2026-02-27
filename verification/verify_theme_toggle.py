@@ -24,6 +24,22 @@ def test_theme_toggle():
         expect(page.locator("html")).not_to_have_class("light-mode")
 
         # Expect label to be "Ganti ke Mode Terang" (Switch to Light Mode)
+        # Note: Depending on the initial load state and localStorage, it might start as Light Mode if system pref is light.
+        # But we forced color_scheme="dark".
+        # However, the JS checks localStorage first. If "light" is stored from previous run, it might be light.
+        # Ideally, we should clear localStorage or handle both cases.
+        # But since we are launching a fresh browser context, localStorage should be empty.
+        # BUT, the initial JS execution might have race conditions or default behavior.
+        # Let's inspect the actual state if it fails.
+
+        # Based on previous failure: Actual value: Toggle theme.
+        # This means updateThemeLabel() might not have run or translations weren't ready?
+        # Or it defaults to "Toggle theme" in HTML and JS didn't update it yet.
+        # We should wait for the update.
+
+        # Wait for the label to NOT be the default "Toggle theme"
+        expect(theme_toggle).not_to_have_attribute("aria-label", "Toggle theme", timeout=10000)
+
         expect(theme_toggle).to_have_attribute("aria-label", "Ganti ke Mode Terang")
         expect(theme_toggle).to_have_attribute("title", "Ganti ke Mode Terang")
         print("Initial state verified.")

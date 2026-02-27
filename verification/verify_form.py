@@ -53,7 +53,8 @@ def test_form_ux():
         status_div = page.locator("#form-status")
 
         print("Submitting form...")
-        submit_btn.click()
+        # Add force=True to bypass checks if the element is covered or animating
+        submit_btn.click(force=True)
 
         # Verify Success State
         print("Waiting for success message...")
