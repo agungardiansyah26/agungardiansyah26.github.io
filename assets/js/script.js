@@ -22,19 +22,44 @@ revealElements.forEach((el) => revealObserver.observe(el));
 
 // Active Navigation Link
 const sections = document.querySelectorAll("section[id]");
-const navLinks = document.querySelectorAll(".nav-link");
+const navLinkMap = new Map();
+let currentActiveLink = null;
+
+// Pre-calculate the map for O(1) lookup
+document.querySelectorAll(".nav-link").forEach((link) => {
+  const href = link.getAttribute("href");
+  if (href && href.startsWith("#")) {
+    const id = href.substring(1);
+    navLinkMap.set(id, link);
+  }
+});
+
+// Initialize currentActiveLink based on DOM state
+document.querySelectorAll(".nav-link").forEach((link) => {
+  if (link.classList.contains("active")) {
+    currentActiveLink = link;
+  }
+});
 
 const navObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
+        const newActiveLink = navLinkMap.get(id);
+
+        if (newActiveLink) {
+          if (newActiveLink !== currentActiveLink) {
+            if (currentActiveLink) {
+              currentActiveLink.classList.remove("active");
+            }
+            newActiveLink.classList.add("active");
+            currentActiveLink = newActiveLink;
           }
-        });
+        } else if (currentActiveLink) {
+          currentActiveLink.classList.remove("active");
+          currentActiveLink = null;
+        }
       }
     });
   },
@@ -42,6 +67,7 @@ const navObserver = new IntersectionObserver(
     threshold: 0.3, // Trigger when 30% of the section is visible
   }
 );
+
 
 sections.forEach((section) => navObserver.observe(section));
 
