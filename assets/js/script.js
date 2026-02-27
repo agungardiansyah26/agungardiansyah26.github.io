@@ -84,13 +84,70 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(str) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(str, 'text/html');
+  const allowedTags = ['B', 'I', 'STRONG', 'EM', 'SPAN', 'BR', 'P'];
+  const allowedAttrs = ['class'];
+
+  function clean(node) {
+    const children = Array.from(node.childNodes);
+    children.forEach(clean);
+
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      // Skip validating the body element itself, as we want to return its innerHTML
+      if (node === doc.body) return;
+
+      if (!allowedTags.includes(node.tagName)) {
+        // If tag is not allowed, replace it with its children (unwrap) or remove if dangerous
+        // Here we choose to unwrap to preserve text content, unless it's a script/style which we shouldn't have anyway
+        // But parseFromString puts them in head/body.
+        // Safer approach:
+        // If it's a script/object/embed/iframe, remove it entirely.
+        // If it's a div/h1/etc, maybe we want to keep text?
+        // Simple allowlist strategy:
+        // If not in allowlist, remove the tag but keep children?
+        // Or remove entirely?
+        // Let's remove entirely for now to be safe against complex attacks,
+        // OR better: create a new safe node and copy children.
+
+        // Actually, for this specific use case (translations), we usually just want formatting.
+        // Let's strip the tag but keep textContent if it's not a dangerous tag like script.
+
+        // But simply:
+        if (['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK'].includes(node.tagName)) {
+            node.remove();
+        } else {
+            // Unwrap: replace node with its children
+            const parent = node.parentNode;
+            while (node.firstChild) {
+                parent.insertBefore(node.firstChild, node);
+            }
+            parent.removeChild(node);
+        }
+      } else {
+        // Tag is allowed, check attributes
+        const attrs = Array.from(node.attributes);
+        attrs.forEach(attr => {
+          if (!allowedAttrs.includes(attr.name)) {
+            node.removeAttribute(attr.name);
+          }
+        });
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
