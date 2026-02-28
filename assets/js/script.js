@@ -84,13 +84,55 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+
+function sanitizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttributes = ['class', 'href', 'target', 'rel'];
+
+  function cleanNode(node) {
+    const children = Array.from(node.childNodes);
+    for (const child of children) {
+      cleanNode(child);
+    }
+
+    if (node === doc.body) return;
+
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (!allowedTags.includes(node.tagName)) {
+        while (node.firstChild) {
+          node.parentNode.insertBefore(node.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+      } else {
+        const attributes = Array.from(node.attributes);
+        for (const attr of attributes) {
+          if (!allowedAttributes.includes(attr.name)) {
+            node.removeAttribute(attr.name);
+          } else if (attr.name === 'href' || attr.name === 'src') {
+            // Mitigate javascript: and data: URIs
+            const val = attr.value.trim().toLowerCase();
+            if (val.startsWith('javascript:') || val.startsWith('data:')) {
+              node.removeAttribute(attr.name);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  cleanNode(doc.body);
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
