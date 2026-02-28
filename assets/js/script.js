@@ -23,20 +23,45 @@ revealElements.forEach((el) => revealObserver.observe(el));
 // Active Navigation Link
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(".nav-link");
+const navLinkMap = new Map();
+let currentActiveLink = null;
+
+// Initialize the map and current active link
+navLinks.forEach((link) => {
+  const href = link.getAttribute("href");
+  if (href && href.startsWith("#")) {
+    const id = href.substring(1);
+    navLinkMap.set(id, link);
+    if (link.classList.contains("active")) {
+      currentActiveLink = link;
+    }
+  }
+});
 
 const navObserver = new IntersectionObserver(
   (entries) => {
+    // Find the last intersecting entry (typically furthest down the DOM when multiple sections intersect simultaneously)
+    let lastIntersectingEntry = null;
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
-          }
-        });
+        lastIntersectingEntry = entry;
       }
     });
+
+    if (lastIntersectingEntry) {
+      const id = lastIntersectingEntry.target.getAttribute("id");
+      const nextActiveLink = navLinkMap.get(id);
+
+      if (currentActiveLink !== nextActiveLink) {
+        if (currentActiveLink) {
+          currentActiveLink.classList.remove("active");
+        }
+        if (nextActiveLink) {
+          nextActiveLink.classList.add("active");
+        }
+        currentActiveLink = nextActiveLink;
+      }
+    }
   },
   {
     threshold: 0.3, // Trigger when 30% of the section is visible
