@@ -84,13 +84,48 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttributes = ['class', 'href', 'target', 'rel'];
+
+  function clean(node) {
+    const children = Array.from(node.childNodes);
+    children.forEach(clean);
+
+    if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'BODY') {
+      if (!allowedTags.includes(node.tagName)) {
+        while (node.firstChild) {
+          node.parentNode.insertBefore(node.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+      } else {
+        Array.from(node.attributes).forEach(attr => {
+          if (!allowedAttributes.includes(attr.name)) {
+            node.removeAttribute(attr.name);
+          } else if (attr.name === 'href' || attr.name === 'src') {
+            const val = attr.value.replace(/[\x00-\x20\u00A0]/g, '').toLowerCase();
+            if (val.startsWith('javascript:') || val.startsWith('data:') || val.startsWith('vbscript:')) {
+              node.removeAttribute(attr.name);
+            }
+          }
+        });
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
