@@ -24,19 +24,40 @@ revealElements.forEach((el) => revealObserver.observe(el));
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(".nav-link");
 
+// ⚡ Bolt Performance Optimization:
+// Use a Map for O(1) lookups and track current state to minimize DOM updates.
+const navMap = new Map();
+let currentActiveLink = null;
+
+navLinks.forEach((link) => {
+  const href = link.getAttribute("href");
+  if (href && href.startsWith("#")) {
+    const id = href.substring(1);
+    navMap.set(id, link);
+    if (link.classList.contains("active")) {
+      currentActiveLink = link;
+    }
+  }
+});
+
 const navObserver = new IntersectionObserver(
   (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
-          }
-        });
+    const intersectingEntries = entries.filter((entry) => entry.isIntersecting);
+
+    if (intersectingEntries.length > 0) {
+      // Prioritize the last intersecting entry when multiple sections are visible
+      const entry = intersectingEntries[intersectingEntries.length - 1];
+      const id = entry.target.getAttribute("id");
+      const targetLink = navMap.get(id);
+
+      if (targetLink && targetLink !== currentActiveLink) {
+        if (currentActiveLink) {
+          currentActiveLink.classList.remove("active");
+        }
+        targetLink.classList.add("active");
+        currentActiveLink = targetLink;
       }
-    });
+    }
   },
   {
     threshold: 0.3, // Trigger when 30% of the section is visible
