@@ -78,6 +78,66 @@ themeToggle.addEventListener("click", () => {
 const langIdBtn = document.getElementById("lang-id");
 const langEnBtn = document.getElementById("lang-en");
 
+/**
+ * Sanitizes an HTML string to prevent XSS vulnerabilities.
+ * Allows only specific tags and attributes.
+ * @param {string} htmlString - The raw HTML string to sanitize.
+ * @returns {string} The sanitized HTML string.
+ */
+function sanitizeHTML(htmlString) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttributes = ['class', 'href', 'target', 'rel'];
+
+  function clean(node) {
+    // Bottom-up recursion
+    const children = Array.from(node.childNodes);
+    for (const child of children) {
+      clean(child);
+    }
+
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      // Explicitly skip validation of the root body node to prevent it from being unwrapped/removed
+      if (node.tagName === 'BODY' || node.tagName === 'HTML' || node.tagName === 'HEAD') {
+        return;
+      }
+
+      // If tag is not allowed, unwrap it (keep its children) and remove the node itself
+      if (!allowedTags.includes(node.tagName)) {
+        while (node.firstChild) {
+          node.parentNode.insertBefore(node.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+        return;
+      }
+
+      // Clean attributes
+      const attributes = Array.from(node.attributes);
+      for (const attr of attributes) {
+        if (!allowedAttributes.includes(attr.name)) {
+          node.removeAttribute(attr.name);
+          continue;
+        }
+
+        // Additional checks for href and src to block dangerous URIs
+        if (attr.name === 'href' || attr.name === 'src') {
+          // Strip control characters and spaces to prevent HTML entity bypasses like jav&#x09;ascript:
+          const sanitizedValue = attr.value.replace(/[\x00-\x20\u00A0]/g, '').toLowerCase();
+          if (sanitizedValue.startsWith('javascript:') ||
+              sanitizedValue.startsWith('data:') ||
+              sanitizedValue.startsWith('vbscript:')) {
+            node.removeAttribute(attr.name);
+          }
+        }
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function getNestedTranslation(obj, path) {
   return path.split('.').reduce((prev, curr) => {
     return prev ? prev[curr] : null;
@@ -90,7 +150,7 @@ function updateContent(lang) {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
