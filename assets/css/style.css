@@ -129,6 +129,12 @@ a {
     text-decoration: none;
 }
 
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 main {
     max-width: 1080px;
     margin: 0 auto;
@@ -230,7 +236,6 @@ main {
 .lang-option:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 4px;
-    border-radius: 4px;
 }
 
 .lang-option:hover {
