@@ -19,3 +19,7 @@
 ## 2024-05-24 - Dynamic ARIA Labels for Toggles
 **Learning:** Static `aria-label` ("Toggle Theme") is insufficient for state toggles. Users need to know the *current state* or the *next action* (e.g., "Switch to Light Mode").
 **Action:** Use JavaScript to update `aria-label` (and `title`) dynamically based on state and current language.
+
+## 2024-05-25 - Standardized focus indicators
+**Learning:** Modern browsers automatically adapt the focus outline to match the element's native border-radius. Enforcing a global `border-radius` on focus states can break this native adaptation.
+**Action:** Use a global `:focus-visible` rule with `outline` and `outline-offset`, and remove custom border-radius properties from focus states to let the browser handle it naturally.
