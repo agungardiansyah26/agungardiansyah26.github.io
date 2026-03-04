@@ -84,13 +84,57 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttributes = ['class', 'href', 'target', 'rel'];
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  function clean(node) {
+    // Bottom-up recursion
+    Array.from(node.childNodes).forEach(clean);
+
+    if (node.nodeType === 1) { // Node.ELEMENT_NODE
+      if (node.tagName === 'BODY' || node.tagName === 'HTML' || node.tagName === 'HEAD') return;
+
+      if (!allowedTags.includes(node.tagName)) {
+        // Unwrap disallowed elements
+        while (node.firstChild) {
+          node.parentNode.insertBefore(node.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+        return;
+      }
+
+      // Clean attributes
+      Array.from(node.attributes).forEach(attr => {
+        if (!allowedAttributes.includes(attr.name)) {
+          node.removeAttribute(attr.name);
+        } else if (attr.name === 'href' || attr.name === 'src') {
+          // Strip control characters to prevent HTML entity bypasses
+          const sanitizedVal = attr.value.replace(/[\x00-\x20\u00A0]/g, '').toLowerCase();
+          if (sanitizedVal.startsWith('javascript:') ||
+              sanitizedVal.startsWith('data:') ||
+              sanitizedVal.startsWith('vbscript:')) {
+            node.removeAttribute(attr.name);
+          }
+        }
+      });
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
