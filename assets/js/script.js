@@ -78,6 +78,48 @@ themeToggle.addEventListener("click", () => {
 const langIdBtn = document.getElementById("lang-id");
 const langEnBtn = document.getElementById("lang-en");
 
+function sanitizeHTML(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttributes = ['class', 'href', 'target', 'rel'];
+
+  function clean(node) {
+    const children = Array.from(node.childNodes);
+    for (const child of children) {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        clean(child);
+        if (!allowedTags.includes(child.tagName)) {
+          // Unwrap invalid tags by moving children to parent, then remove the tag
+          while (child.firstChild) {
+            node.insertBefore(child.firstChild, child);
+          }
+          if (child !== doc.body) { // Do not unwrap/remove body
+            node.removeChild(child);
+          }
+        } else {
+          // Clean attributes of valid tags
+          const attributes = Array.from(child.attributes);
+          for (const attr of attributes) {
+            if (!allowedAttributes.includes(attr.name)) {
+              child.removeAttribute(attr.name);
+            } else if (attr.name === 'href' || attr.name === 'src') {
+              // Strip control characters and spaces
+              const uri = attr.value.replace(/[\x00-\x20\u00A0]/g, '');
+              const lowerUri = uri.toLowerCase();
+              if (lowerUri.startsWith('javascript:') || lowerUri.startsWith('data:') || lowerUri.startsWith('vbscript:')) {
+                child.removeAttribute(attr.name);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function getNestedTranslation(obj, path) {
   return path.split('.').reduce((prev, curr) => {
     return prev ? prev[curr] : null;
@@ -90,7 +132,7 @@ function updateContent(lang) {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
