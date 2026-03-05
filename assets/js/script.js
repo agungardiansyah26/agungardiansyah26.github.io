@@ -24,19 +24,35 @@ revealElements.forEach((el) => revealObserver.observe(el));
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(".nav-link");
 
+// Build a Map for O(1) lookup
+const navMap = new Map();
+navLinks.forEach((link) => {
+  navMap.set(link.getAttribute("href"), link);
+});
+
+// Track the current active link to minimize DOM updates
+let currentActiveLink = document.querySelector(".nav-link.active");
+
 const navObserver = new IntersectionObserver(
   (entries) => {
+    // If multiple sections intersect at once, prioritize the last one
+    let targetId = null;
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
-          }
-        });
+        targetId = entry.target.getAttribute("id");
       }
     });
+
+    if (targetId) {
+      const targetLink = navMap.get(`#${targetId}`);
+      if (targetLink && targetLink !== currentActiveLink) {
+        if (currentActiveLink) {
+          currentActiveLink.classList.remove("active");
+        }
+        targetLink.classList.add("active");
+        currentActiveLink = targetLink;
+      }
+    }
   },
   {
     threshold: 0.3, // Trigger when 30% of the section is visible
