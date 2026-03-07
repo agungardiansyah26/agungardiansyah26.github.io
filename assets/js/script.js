@@ -78,6 +78,48 @@ themeToggle.addEventListener("click", () => {
 const langIdBtn = document.getElementById("lang-id");
 const langEnBtn = document.getElementById("lang-en");
 
+function sanitizeHTML(html) {
+  const ALLOWED_TAGS = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const ALLOWED_ATTRIBUTES = ['class', 'href', 'target', 'rel'];
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  function clean(node) {
+    for (let i = node.childNodes.length - 1; i >= 0; i--) {
+      clean(node.childNodes[i]);
+    }
+
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (node.tagName === 'BODY' || node.tagName === 'HTML' || node.tagName === 'HEAD') {
+        return;
+      }
+
+      if (!ALLOWED_TAGS.includes(node.tagName.toUpperCase())) {
+        while (node.firstChild) {
+          node.parentNode.insertBefore(node.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+      } else {
+        for (let i = node.attributes.length - 1; i >= 0; i--) {
+          const attr = node.attributes[i];
+          if (!ALLOWED_ATTRIBUTES.includes(attr.name.toLowerCase())) {
+            node.removeAttribute(attr.name);
+          } else if (attr.name.toLowerCase() === 'href' || attr.name.toLowerCase() === 'src') {
+            const strippedVal = attr.value.replace(/[\x00-\x20\u00A0]/g, '').toLowerCase();
+            if (strippedVal.startsWith('javascript:') || strippedVal.startsWith('data:') || strippedVal.startsWith('vbscript:')) {
+              node.removeAttribute(attr.name);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function getNestedTranslation(obj, path) {
   return path.split('.').reduce((prev, curr) => {
     return prev ? prev[curr] : null;
@@ -90,7 +132,7 @@ function updateContent(lang) {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
@@ -99,6 +141,8 @@ function updateContent(lang) {
     const key = element.getAttribute("data-i18n-placeholder");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
+      // placeholders are plain text, no HTML sanitization needed
+      // but we should ensure no HTML entities are double encoded
       element.placeholder = translation;
     }
   });
