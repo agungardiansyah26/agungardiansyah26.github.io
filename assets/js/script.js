@@ -24,19 +24,39 @@ revealElements.forEach((el) => revealObserver.observe(el));
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(".nav-link");
 
+// ⚡ Bolt Optimization: Use a Map for O(1) lookups and track current active link
+// to avoid O(N) DOM queries/writes on every scroll intersection.
+const navMap = new Map();
+let currentActiveLink = null;
+
+navLinks.forEach((link) => {
+  const targetId = link.getAttribute("href").substring(1);
+  navMap.set(targetId, link);
+  if (link.classList.contains("active")) {
+    currentActiveLink = link;
+  }
+});
+
 const navObserver = new IntersectionObserver(
   (entries) => {
+    let intersectingId = null;
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
-          }
-        });
+        // Prioritize the last intersecting entry if multiple are visible
+        intersectingId = entry.target.getAttribute("id");
       }
     });
+
+    if (intersectingId) {
+      const newActiveLink = navMap.get(intersectingId);
+      if (newActiveLink && newActiveLink !== currentActiveLink) {
+        if (currentActiveLink) {
+          currentActiveLink.classList.remove("active");
+        }
+        newActiveLink.classList.add("active");
+        currentActiveLink = newActiveLink;
+      }
+    }
   },
   {
     threshold: 0.3, // Trigger when 30% of the section is visible
