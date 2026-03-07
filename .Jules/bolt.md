@@ -5,3 +5,7 @@
 ## 2026-02-23 - [Scroll Performance Optimization]
 **Learning:** Attaching scroll event listeners directly to the window without throttling causes excessive function calls and layout thrashing, especially on high-refresh-rate displays.
 **Action:** Use `requestAnimationFrame` to throttle scroll handlers for visual updates, ensuring logic runs at most once per frame. Use `{ passive: true }` to allow the browser to optimize scrolling.
+
+## 2026-03-07 - [Scroll Navigation DOM Updates]
+**Learning:** Continuous O(N) DOM queries and updates within an IntersectionObserver callback to highlight active navigation links cause unnecessary layout recalculations and reduce scrolling performance.
+**Action:** Use a Map for O(1) link lookups and track the `currentActiveLink`. This limits DOM writes strictly to moments when the active link changes, preventing redundant layout thrashing.
