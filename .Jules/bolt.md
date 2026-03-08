@@ -5,3 +5,7 @@
 ## 2026-02-23 - [Scroll Performance Optimization]
 **Learning:** Attaching scroll event listeners directly to the window without throttling causes excessive function calls and layout thrashing, especially on high-refresh-rate displays.
 **Action:** Use `requestAnimationFrame` to throttle scroll handlers for visual updates, ensuring logic runs at most once per frame. Use `{ passive: true }` to allow the browser to optimize scrolling.
+
+## 2026-03-08 - [Intersection Observer DOM Thrashing]
+**Learning:** Iterating over all navigation links and performing DOM mutations (`classList.remove`, `classList.add`) on every Intersection Observer trigger causes unnecessary layout thrashing, especially when scrolling quickly.
+**Action:** Use a `Map` for O(1) lookups to associate sections with their links and track the `currentActiveLink` to only mutate the DOM when the active section actually changes. Ensure the last intersecting entry is prioritized when multiple sections are visible simultaneously.

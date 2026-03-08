@@ -24,19 +24,49 @@ revealElements.forEach((el) => revealObserver.observe(el));
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(".nav-link");
 
+// Create a Map for O(1) lookups: Map<sectionId, Array<HTMLAnchorElement>>
+const navMap = new Map();
+navLinks.forEach((link) => {
+  const href = link.getAttribute("href");
+  if (href && href.startsWith("#")) {
+    const id = href.substring(1);
+    if (!navMap.has(id)) {
+      navMap.set(id, []);
+    }
+    navMap.get(id).push(link);
+  }
+});
+
+let currentActiveLinks = [];
+// Initialize currentActiveLinks from the DOM if any are already active
+navLinks.forEach((link) => {
+  if (link.classList.contains("active")) {
+    currentActiveLinks.push(link);
+  }
+});
+
 const navObserver = new IntersectionObserver(
   (entries) => {
+    // When multiple sections intersect, prioritize the last one in the entries array
+    // (which usually corresponds to the one further down the page)
+    let intersectingEntry = null;
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
-          }
-        });
+        intersectingEntry = entry;
       }
     });
+
+    if (intersectingEntry) {
+      const id = intersectingEntry.target.getAttribute("id");
+      const activeLinks = navMap.get(id);
+
+      // Only mutate the DOM if the active links actually change
+      if (activeLinks && (currentActiveLinks.length === 0 || currentActiveLinks[0] !== activeLinks[0])) {
+        currentActiveLinks.forEach(link => link.classList.remove("active"));
+        activeLinks.forEach(link => link.classList.add("active"));
+        currentActiveLinks = activeLinks;
+      }
+    }
   },
   {
     threshold: 0.3, // Trigger when 30% of the section is visible
