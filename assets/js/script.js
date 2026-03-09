@@ -78,6 +78,43 @@ themeToggle.addEventListener("click", () => {
 const langIdBtn = document.getElementById("lang-id");
 const langEnBtn = document.getElementById("lang-en");
 
+function sanitizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttributes = ['class', 'href', 'target', 'rel'];
+
+  function clean(node) {
+    const nodes = Array.from(node.childNodes);
+    for (const child of nodes) {
+      clean(child);
+    }
+    if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'BODY') {
+      if (!allowedTags.includes(node.tagName)) {
+        while (node.firstChild) {
+          node.parentNode.insertBefore(node.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+      } else {
+        const attributes = Array.from(node.attributes);
+        for (const attr of attributes) {
+          if (!allowedAttributes.includes(attr.name)) {
+            node.removeAttribute(attr.name);
+          } else if (attr.name === 'href' || attr.name === 'src') {
+            const val = attr.value.replace(/[\x00-\x20\u00A0]/g, '').toLowerCase();
+            if (val.startsWith('javascript:') || val.startsWith('data:') || val.startsWith('vbscript:')) {
+              node.removeAttribute(attr.name);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function getNestedTranslation(obj, path) {
   return path.split('.').reduce((prev, curr) => {
     return prev ? prev[curr] : null;
@@ -90,7 +127,7 @@ function updateContent(lang) {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
