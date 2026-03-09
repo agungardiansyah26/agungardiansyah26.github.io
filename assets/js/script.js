@@ -124,7 +124,14 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+// Only run updateContent if the saved language is different from the default (id),
+// preventing redundant DOM queries and rewrites on initial load since index.html is already in Indonesian.
+if (savedLang !== "id") {
+  updateContent(savedLang);
+} else {
+  // We still need to set the correct aria-label for the theme toggle on load
+  updateThemeLabel();
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));

@@ -5,3 +5,7 @@
 ## 2026-02-23 - [Scroll Performance Optimization]
 **Learning:** Attaching scroll event listeners directly to the window without throttling causes excessive function calls and layout thrashing, especially on high-refresh-rate displays.
 **Action:** Use `requestAnimationFrame` to throttle scroll handlers for visual updates, ensuring logic runs at most once per frame. Use `{ passive: true }` to allow the browser to optimize scrolling.
+
+## 2026-03-09 - [Redundant Initial Render Updates]
+**Learning:** Running JavaScript state initialization that overwrites the DOM with the same content as the initial HTML payload causes unnecessary DOM queries, layout reflows, and performance bottlenecks, especially in large translation objects.
+**Action:** Check local state against the default HTML state before applying updates on initial load. If they match, skip the heavy DOM operations and only initialize necessary interactive properties (like ARIA labels).
