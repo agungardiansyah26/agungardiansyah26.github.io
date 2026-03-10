@@ -84,13 +84,58 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttributes = ['class', 'href', 'target', 'rel'];
+
+  function cleanNode(node) {
+    // Process children first (bottom-up recursion)
+    const children = Array.from(node.childNodes);
+    for (const child of children) {
+      cleanNode(child);
+    }
+
+    // Skip validation of the root body node
+    if (node.nodeName === 'BODY') return;
+
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (!allowedTags.includes(node.nodeName)) {
+        // Replace invalid node with its text content
+        const textNode = document.createTextNode(node.textContent);
+        node.parentNode.replaceChild(textNode, node);
+      } else {
+        // Clean attributes
+        const attributes = Array.from(node.attributes);
+        for (const attr of attributes) {
+          if (!allowedAttributes.includes(attr.name)) {
+            node.removeAttribute(attr.name);
+          } else if (attr.name === 'href' || attr.name === 'src') {
+            let url = attr.value;
+            // Strip control characters and spaces
+            url = url.replace(/[\x00-\x20\u00A0]/g, '');
+            const lowerUrl = url.toLowerCase();
+            if (lowerUrl.startsWith('javascript:') || lowerUrl.startsWith('data:') || lowerUrl.startsWith('vbscript:')) {
+              node.removeAttribute(attr.name);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  cleanNode(doc.body);
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
