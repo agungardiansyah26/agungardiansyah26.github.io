@@ -84,13 +84,44 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const allowedTags = new Set(['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A']);
+  const allowedAttrs = new Set(['class', 'href', 'target', 'rel']);
+
+  function clean(node) {
+    Array.from(node.childNodes).forEach(child => {
+      if (child.nodeType === 1) clean(child);
+    });
+
+    // explicitly skip body validation
+    if (node.nodeName === 'BODY') return;
+
+    if (!allowedTags.has(node.nodeName)) {
+      node.replaceWith(...node.childNodes);
+    } else {
+      Array.from(node.attributes).forEach(attr => {
+        if (!allowedAttrs.has(attr.name)) {
+          node.removeAttribute(attr.name);
+        } else if (['href', 'src'].includes(attr.name)) {
+          const val = attr.value.replace(/[\x00-\x20\u00A0]/g, '').toLowerCase();
+          if (/^(javascript|data|vbscript):/.test(val)) node.removeAttribute(attr.name);
+        }
+      });
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
