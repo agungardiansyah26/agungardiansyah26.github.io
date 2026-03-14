@@ -5,3 +5,7 @@
 ## 2026-02-23 - [Scroll Performance Optimization]
 **Learning:** Attaching scroll event listeners directly to the window without throttling causes excessive function calls and layout thrashing, especially on high-refresh-rate displays.
 **Action:** Use `requestAnimationFrame` to throttle scroll handlers for visual updates, ensuring logic runs at most once per frame. Use `{ passive: true }` to allow the browser to optimize scrolling.
+
+## 2025-02-13 - Avoid redundant DOM updates on initial load for i18n
+**Learning:** Initializing translations via `innerHTML` on application load can result in hundreds of unnecessary DOM mutations if the requested language state matches the default HTML payload.
+**Action:** Always skip redundant initialization logic (e.g. `updateContent`) when the requested state already matches the initial, server-provided document payload to save on execution time and avoid layout thrashing.
