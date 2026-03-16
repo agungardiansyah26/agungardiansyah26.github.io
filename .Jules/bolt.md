@@ -1,7 +1,3 @@
-## 2026-02-20 - [Theme Toggle FOUC Prevention]
-**Learning:** Static sites relying on deferred JS for theme toggling experience a Flash of Unstyled Content (FOUC) and layout shifts.
-**Action:** Use an inline script in `<head>` to detect preferences and apply classes immediately to `<html>`, combined with CSS-based icon visibility logic, to ensure correct initial render.
-
-## 2026-02-23 - [Scroll Performance Optimization]
-**Learning:** Attaching scroll event listeners directly to the window without throttling causes excessive function calls and layout thrashing, especially on high-refresh-rate displays.
-**Action:** Use `requestAnimationFrame` to throttle scroll handlers for visual updates, ensuring logic runs at most once per frame. Use `{ passive: true }` to allow the browser to optimize scrolling.
+## 2024-05-16 - Prevent Redundant Initial Load Translations and Optimize Observer Mutations
+**Learning:** Performing a full DOM query and update for translations on initial load is redundant if the default language payload in HTML matches the user's saved preference ('id'). Additionally, IntersectionObserver callbacks can cause unnecessary layout thrashing if they mutate `classList` without checking if the active element has actually changed.
+**Action:** Skip `updateContent` on initial load if `savedLang === 'id'`, only calling `updateThemeLabel()`. For `IntersectionObserver`, precompute elements into a `Map` for O(1) lookup and maintain a reference to `currentActiveLinks` to ensure `classList.add/remove` are only called when the active state actually transitions.

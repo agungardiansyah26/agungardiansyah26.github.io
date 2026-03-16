@@ -24,19 +24,44 @@ revealElements.forEach((el) => revealObserver.observe(el));
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(".nav-link");
 
+// Build a map for O(1) lookup
+const navLinksMap = new Map();
+navLinks.forEach((link) => {
+  const href = link.getAttribute("href");
+  if (href && href.startsWith("#")) {
+    const id = href.substring(1);
+    if (!navLinksMap.has(id)) {
+      navLinksMap.set(id, []);
+    }
+    navLinksMap.get(id).push(link);
+  }
+});
+
+let currentActiveLinks = [];
+
 const navObserver = new IntersectionObserver(
   (entries) => {
+    let intersectingEntry = null;
+
+    // Find the last intersecting entry to prioritize when multiple sections are visible
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
-          }
-        });
+        intersectingEntry = entry;
       }
     });
+
+    if (intersectingEntry) {
+      const id = intersectingEntry.target.getAttribute("id");
+      const targetLinks = navLinksMap.get(id) || [];
+
+      // We ONLY update if the target active links actually change.
+      // This prevents layout thrashing.
+      if (currentActiveLinks !== targetLinks) {
+        currentActiveLinks.forEach((link) => link.classList.remove("active"));
+        targetLinks.forEach((link) => link.classList.add("active"));
+        currentActiveLinks = targetLinks;
+      }
+    }
   },
   {
     threshold: 0.3, // Trigger when 30% of the section is visible
@@ -124,7 +149,12 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+if (savedLang === "id") {
+  // Skip redundant DOM queries on initial load since default HTML payload is 'id'
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
