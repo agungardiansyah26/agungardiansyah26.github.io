@@ -84,13 +84,35 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+// Basic HTML Sanitizer to prevent XSS
+function sanitizeHTML(html) {
+  if (!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  // Remove dangerous tags
+  const tags = doc.querySelectorAll('script, iframe, object, embed');
+  tags.forEach(el => el.remove());
+
+  // Remove dangerous attributes
+  const elements = doc.querySelectorAll('*');
+  elements.forEach(el => {
+    Array.from(el.attributes).forEach(attr => {
+      if (attr.name.startsWith('on') || attr.value.trim().toLowerCase().startsWith('javascript:')) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
