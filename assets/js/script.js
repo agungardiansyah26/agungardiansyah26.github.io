@@ -84,13 +84,39 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+// Security: Native DOMParser for XSS sanitization without external dependencies
+function sanitizeHTML(html) {
+  if (!html) return '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const elements = doc.body.querySelectorAll('*');
+  const blockedTags = ['script', 'iframe', 'object', 'embed'];
+
+  elements.forEach(el => {
+    // Remove blocked tags entirely
+    if (blockedTags.includes(el.tagName.toLowerCase())) {
+      el.remove();
+      return;
+    }
+    // Remove attributes starting with 'on' or 'javascript:'
+    Array.from(el.attributes).forEach(attr => {
+      const name = attr.name.toLowerCase();
+      const value = attr.value.toLowerCase();
+      if (name.startsWith('on') || value.startsWith('javascript:')) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
