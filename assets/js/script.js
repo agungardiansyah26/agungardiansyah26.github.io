@@ -78,6 +78,26 @@ themeToggle.addEventListener("click", () => {
 const langIdBtn = document.getElementById("lang-id");
 const langEnBtn = document.getElementById("lang-en");
 
+function sanitizeHTML(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
+
+  dangerousTags.forEach(tag => {
+    const elements = doc.querySelectorAll(tag);
+    elements.forEach(el => el.remove());
+  });
+
+  doc.querySelectorAll('*').forEach(el => {
+    Array.from(el.attributes).forEach(attr => {
+      if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().includes('javascript:')) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+
+  return doc.body.innerHTML;
+}
+
 function getNestedTranslation(obj, path) {
   return path.split('.').reduce((prev, curr) => {
     return prev ? prev[curr] : null;
@@ -90,7 +110,7 @@ function updateContent(lang) {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
