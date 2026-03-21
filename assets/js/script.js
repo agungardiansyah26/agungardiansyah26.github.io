@@ -84,13 +84,32 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
+  dangerousTags.forEach(tag => {
+    const elements = doc.querySelectorAll(tag);
+    elements.forEach(el => el.remove());
+  });
+  const allElements = doc.querySelectorAll('*');
+  allElements.forEach(el => {
+    for (let i = el.attributes.length - 1; i >= 0; i--) {
+      const attrName = el.attributes[i].name;
+      if (attrName.startsWith('on') || el.getAttribute(attrName).trim().toLowerCase().startsWith('javascript:')) {
+        el.removeAttribute(attrName);
+      }
+    }
+  });
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
