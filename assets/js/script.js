@@ -124,7 +124,13 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+if (savedLang === "id") {
+  // ⚡ Bolt: Prevent redundant DOM updates (~100 innerHTML sets)
+  // on initial load since default HTML is already in 'id'.
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
