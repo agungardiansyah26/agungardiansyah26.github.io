@@ -84,13 +84,39 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  if (!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
+  dangerousTags.forEach(tag => {
+    doc.querySelectorAll(tag).forEach(el => el.remove());
+  });
+  doc.querySelectorAll('*').forEach(el => {
+    Array.from(el.attributes).forEach(attr => {
+      const name = attr.name.toLowerCase();
+      // Remove inline event handlers
+      if (name.startsWith('on')) {
+        el.removeAttribute(attr.name);
+      } else if (name === 'href' || name === 'src' || name === 'data') {
+        // Strip out any potentially dangerous URL schemes (like javascript:, vbscript:, data:)
+        // by removing control characters and checking the protocol.
+        const val = attr.value.replace(/[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]/g, '').toLowerCase();
+        if (val.startsWith('javascript:') || val.startsWith('vbscript:') || val.startsWith('data:')) {
+          el.removeAttribute(attr.name);
+        }
+      }
+    });
+  });
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
