@@ -129,6 +129,15 @@ a {
     text-decoration: none;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex='0']:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 main {
     max-width: 1080px;
     margin: 0 auto;
@@ -225,12 +234,6 @@ main {
     font-family: inherit;
     font-size: inherit;
     color: inherit;
-}
-
-.lang-option:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 4px;
-    border-radius: 4px;
 }
 
 .lang-option:hover {
@@ -781,11 +784,6 @@ footer {
     border-color: var(--accent);
     transform: translateY(-4px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.back-to-top:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
 }
 
 .light-mode .back-to-top {
