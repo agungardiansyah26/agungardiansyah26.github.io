@@ -124,7 +124,12 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+if (savedLang === "id") {
+  // The default HTML payload is already 'id'. Avoid ~100 redundant DOM updates.
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
