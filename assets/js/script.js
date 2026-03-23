@@ -124,7 +124,13 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+if (savedLang === "id") {
+  // HTML is already in Indonesian, avoid redundant DOM updates
+  document.documentElement.lang = "id";
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
