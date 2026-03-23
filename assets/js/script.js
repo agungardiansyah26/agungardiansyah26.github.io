@@ -84,13 +84,38 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+// 🛡️ Sentinel: Sanitize user-provided translations before innerHTML injection to prevent DOM-based XSS
+function sanitizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
+  dangerousTags.forEach(tag => {
+    const elements = doc.querySelectorAll(tag);
+    elements.forEach(el => el.remove());
+  });
+
+  const elements = doc.querySelectorAll('*');
+  elements.forEach(el => {
+    for (let i = el.attributes.length - 1; i >= 0; i--) {
+      const attr = el.attributes[i];
+      // Check for inline event handlers or javascript URIs (handling bypasses like leading whitespace)
+      if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().trim().startsWith('javascript:')) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
