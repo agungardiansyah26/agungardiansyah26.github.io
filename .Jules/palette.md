@@ -19,3 +19,7 @@
 ## 2024-05-24 - Dynamic ARIA Labels for Toggles
 **Learning:** Static `aria-label` ("Toggle Theme") is insufficient for state toggles. Users need to know the *current state* or the *next action* (e.g., "Switch to Light Mode").
 **Action:** Use JavaScript to update `aria-label` (and `title`) dynamically based on state and current language.
+
+## 2024-05-25 - ARIA hidden for decorative spans in links
+**Learning:** Screen readers announce every text node within an anchor tag, including text symbols used purely for visual decoration (like "↗" or "↓" arrows indicating external links or downloads). This creates redundant, confusing announcements like "Live Demo arrow pointing up and right".
+**Action:** Always add `aria-hidden="true"` to purely decorative `span` elements or icons nested inside interactive elements like `a` or `button` to ensure clean, focused screen reader announcements.
