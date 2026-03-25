@@ -84,13 +84,40 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+// Security Enhancement: Sanitize translations before assigning to innerHTML
+// to prevent DOM-based XSS attacks via malicious tags or attributes.
+function sanitizeHTML(str) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(str, 'text/html');
+  const body = doc.body;
+
+  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
+  dangerousTags.forEach((tag) => {
+    body.querySelectorAll(tag).forEach((el) => el.remove());
+  });
+
+  const allElements = body.querySelectorAll('*');
+  allElements.forEach((el) => {
+    const attributes = Array.from(el.attributes);
+    attributes.forEach((attr) => {
+      const name = attr.name.toLowerCase();
+      const value = attr.value.trim().toLowerCase();
+      if (name.startsWith('on') || value.startsWith('javascript:')) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+
+  return body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
