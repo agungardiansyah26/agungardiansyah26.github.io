@@ -124,7 +124,12 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+if (savedLang !== "id") {
+  updateContent(savedLang);
+} else {
+  // If it's "id", we don't need to rewrite the DOM, but we still need to set the initial theme label correctly
+  updateThemeLabel();
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
