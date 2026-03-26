@@ -19,3 +19,7 @@
 ## 2024-05-24 - Dynamic ARIA Labels for Toggles
 **Learning:** Static `aria-label` ("Toggle Theme") is insufficient for state toggles. Users need to know the *current state* or the *next action* (e.g., "Switch to Light Mode").
 **Action:** Use JavaScript to update `aria-label` (and `title`) dynamically based on state and current language.
+
+## 2024-05-24 - Decorative icons and screen readers
+**Learning:** Screen readers announce every text node within interactive elements, including purely decorative text symbols (like arrows or standard icons). This can create noisy or confusing announcements.
+**Action:** Always add `aria-hidden="true"` to `span` elements or icons used solely for visual decoration to ensure clean and focused screen reader announcements.
