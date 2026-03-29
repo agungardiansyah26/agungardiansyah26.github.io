@@ -84,13 +84,52 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+// 🛡️ Sentinel: Sanitize HTML to prevent DOM-based XSS
+function sanitizeHTML(html) {
+  if (!html) return '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
+
+  const sanitizeNode = (node) => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const tagName = node.tagName.toLowerCase();
+      if (dangerousTags.includes(tagName)) {
+        node.remove();
+        return;
+      }
+
+      const attrs = node.attributes;
+      for (let i = attrs.length - 1; i >= 0; i--) {
+        const attr = attrs[i];
+        const name = attr.name.toLowerCase();
+        const value = attr.value.trim().toLowerCase();
+
+        if (name.startsWith('on') || value.startsWith('javascript:')) {
+          node.removeAttribute(attr.name);
+        }
+      }
+    }
+
+    for (let i = node.childNodes.length - 1; i >= 0; i--) {
+      sanitizeNode(node.childNodes[i]);
+    }
+  };
+
+  for (let i = doc.body.childNodes.length - 1; i >= 0; i--) {
+    sanitizeNode(doc.body.childNodes[i]);
+  }
+
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
