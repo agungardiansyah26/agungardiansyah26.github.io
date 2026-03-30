@@ -124,7 +124,12 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+if (savedLang === "id") {
+  // Avoid redundant DOM updates since HTML defaults to 'id'
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
