@@ -24,19 +24,39 @@ revealElements.forEach((el) => revealObserver.observe(el));
 const sections = document.querySelectorAll("section[id]");
 const navLinks = document.querySelectorAll(".nav-link");
 
+// Build a map of sectionId -> Array of HTMLAnchorElements for O(1) lookups
+const sectionToLinksMap = new Map();
+navLinks.forEach((link) => {
+  const href = link.getAttribute("href");
+  if (href && href.startsWith("#")) {
+    const id = href.substring(1);
+    if (!sectionToLinksMap.has(id)) {
+      sectionToLinksMap.set(id, []);
+    }
+    sectionToLinksMap.get(id).push(link);
+  }
+});
+
+let currentActiveLinks = [];
+
 const navObserver = new IntersectionObserver(
   (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${id}`) {
-            link.classList.add("active");
-          }
-        });
+    // Prioritize the last intersecting entry when multiple sections are visible
+    const intersectingEntries = entries.filter(entry => entry.isIntersecting);
+    if (intersectingEntries.length > 0) {
+      const activeEntry = intersectingEntries[intersectingEntries.length - 1];
+      const id = activeEntry.target.getAttribute("id");
+      const nextActiveLinks = sectionToLinksMap.get(id) || [];
+
+      // Only update DOM if the active section changed
+      if (currentActiveLinks !== nextActiveLinks) {
+        currentActiveLinks.forEach(link => link.classList.remove("active"));
+        nextActiveLinks.forEach(link => link.classList.add("active"));
+        currentActiveLinks = nextActiveLinks;
       }
-    });
+    }
+    // Intentionally retain active state when sections exit,
+    // waiting for a new section to intersect.
   },
   {
     threshold: 0.3, // Trigger when 30% of the section is visible
@@ -124,7 +144,11 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+if (savedLang === "id") {
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
