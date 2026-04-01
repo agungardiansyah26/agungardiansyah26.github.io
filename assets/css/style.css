@@ -43,10 +43,8 @@
     text-decoration: none;
 }
 
-.skip-link:focus {
+.skip-link:focus-visible {
     top: 0;
-    outline: 2px solid var(--text-main);
-    outline-offset: -2px;
 }
 
 #main-content {
@@ -110,6 +108,16 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+/* Global Focus Indicator */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex="0"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 html,
@@ -227,11 +235,6 @@ main {
     color: inherit;
 }
 
-.lang-option:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 4px;
-    border-radius: 4px;
-}
 
 .lang-option:hover {
     color: var(--text-main);
@@ -707,10 +710,8 @@ main {
 }
 
 .input-field:focus {
-    outline: none;
     border-color: var(--accent);
     background: rgba(15, 23, 42, 0.9);
-    box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 textarea.input-field {
@@ -783,10 +784,6 @@ footer {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-.back-to-top:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
 
 .light-mode .back-to-top {
     background: rgba(255, 255, 255, 0.7);

@@ -19,3 +19,7 @@
 ## 2024-05-24 - Dynamic ARIA Labels for Toggles
 **Learning:** Static `aria-label` ("Toggle Theme") is insufficient for state toggles. Users need to know the *current state* or the *next action* (e.g., "Switch to Light Mode").
 **Action:** Use JavaScript to update `aria-label` (and `title`) dynamically based on state and current language.
+
+## 2026-03-21 - Standardized Focus Indicators
+**Learning:** Component-specific focus styles can lead to inconsistencies and missed interactive elements (like custom buttons or input fields) not having visible focus states for keyboard users.
+**Action:** Implement a global `:focus-visible` rule targeting all interactive elements (`a`, `button`, `input`, `textarea`, `[tabindex="0"]`) to ensure a consistent, accessible 2px solid outline with a 2px offset across the entire application, and remove redundant component-specific focus styles.
