@@ -84,13 +84,50 @@ function getNestedTranslation(obj, path) {
   }, obj);
 }
 
+function sanitizeHTML(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttributes = ['class', 'href', 'target', 'rel'];
+
+  function clean(node) {
+    const children = Array.from(node.childNodes);
+    for (const child of children) {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        clean(child);
+        if (child.tagName !== 'BODY' && !allowedTags.includes(child.tagName)) {
+           while(child.firstChild) {
+               child.parentNode.insertBefore(child.firstChild, child);
+           }
+           child.parentNode.removeChild(child);
+        } else {
+          const attrs = Array.from(child.attributes);
+          for (const attr of attrs) {
+            const attrName = attr.name.toLowerCase();
+            if (!allowedAttributes.includes(attrName)) {
+              child.removeAttribute(attrName);
+            } else if (attrName === 'href' || attrName === 'src') {
+              const sanitizedValue = attr.value.replace(/[\x00-\x20\u00A0]/g, '').toLowerCase();
+              if (sanitizedValue.startsWith('javascript:') || sanitizedValue.startsWith('data:') || sanitizedValue.startsWith('vbscript:')) {
+                child.removeAttribute(attrName);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 function updateContent(lang) {
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
