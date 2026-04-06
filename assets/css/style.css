@@ -43,15 +43,12 @@
     text-decoration: none;
 }
 
-.skip-link:focus {
+.skip-link:focus-visible {
     top: 0;
-    outline: 2px solid var(--text-main);
-    outline-offset: -2px;
 }
 
 #main-content {
     scroll-margin-top: 100px;
-    outline: none;
 }
 
 /* Light Mode Specific Overrides */
@@ -110,6 +107,15 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex="0"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 html,
@@ -225,12 +231,6 @@ main {
     font-family: inherit;
     font-size: inherit;
     color: inherit;
-}
-
-.lang-option:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 4px;
-    border-radius: 4px;
 }
 
 .lang-option:hover {
@@ -707,10 +707,8 @@ main {
 }
 
 .input-field:focus {
-    outline: none;
     border-color: var(--accent);
     background: rgba(15, 23, 42, 0.9);
-    box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 textarea.input-field {
@@ -781,11 +779,6 @@ footer {
     border-color: var(--accent);
     transform: translateY(-4px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.back-to-top:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
 }
 
 .light-mode .back-to-top {
