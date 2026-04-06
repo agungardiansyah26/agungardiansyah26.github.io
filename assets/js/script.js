@@ -1,5 +1,40 @@
 document.getElementById("year").textContent = new Date().getFullYear();
 
+// HTML Sanitizer
+function sanitizeHTML(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const allowedTags = ['SPAN', 'STRONG', 'EM', 'B', 'I', 'BR', 'P', 'A'];
+  const allowedAttrs = ['class', 'href', 'target', 'rel'];
+
+  function clean(node) {
+    Array.from(node.childNodes).forEach(clean);
+
+    if (node.nodeType === 1 && node.nodeName !== 'BODY') {
+      if (!allowedTags.includes(node.nodeName)) {
+        const fragment = document.createDocumentFragment();
+        while (node.firstChild) {
+          fragment.appendChild(node.firstChild);
+        }
+        node.replaceWith(fragment);
+      } else {
+        Array.from(node.attributes).forEach(attr => {
+          if (!allowedAttrs.includes(attr.name)) {
+            node.removeAttribute(attr.name);
+          } else if (attr.name === 'href' || attr.name === 'src') {
+            const val = attr.value.replace(/[\x00-\x20\u00A0]/g, '').toLowerCase();
+            if (val.startsWith('javascript:') || val.startsWith('data:') || val.startsWith('vbscript:')) {
+              node.removeAttribute(attr.name);
+            }
+          }
+        });
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 // Scroll Reveal Animation
 const revealElements = document.querySelectorAll(".reveal");
 
@@ -90,7 +125,7 @@ function updateContent(lang) {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
-      element.innerHTML = translation;
+      element.innerHTML = sanitizeHTML(translation);
     }
   });
 
