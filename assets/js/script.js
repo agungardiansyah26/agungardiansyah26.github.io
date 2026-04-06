@@ -124,7 +124,17 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+
+// ⚡ Bolt Optimization: Skip redundant DOM updates
+// If the saved language is 'id' (default HTML payload),
+// we skip calling updateContent to prevent 100+ unnecessary innerHTML rewrites
+// and DOM queries on initial render.
+if (savedLang === "id") {
+  // Ensure the toggle label is updated even if we skip content update
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
