@@ -124,7 +124,15 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+// Performance Optimization: Prevent redundant DOM mutations on initial load
+// The default HTML payload is already in 'id'. If the saved language is 'id',
+// we skip the expensive querySelectorAll and innerHTML updates, and just
+// ensure the theme toggle button's aria-label is correct.
+if (savedLang === "id") {
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
