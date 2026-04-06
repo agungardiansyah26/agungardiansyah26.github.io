@@ -124,7 +124,14 @@ function updateContent(lang) {
 
 // Initial Load
 const savedLang = localStorage.getItem("lang") || "id";
-updateContent(savedLang);
+if (savedLang === "id") {
+  // ⚡ Bolt Optimization: Skip redundant DOM updates on initial load
+  // since the HTML payload is already localized in 'id'
+  // Saves ~104 DOM queries and updates, improving TTI
+  updateThemeLabel();
+} else {
+  updateContent(savedLang);
+}
 
 // Event Listeners
 langIdBtn.addEventListener("click", () => updateContent("id"));
