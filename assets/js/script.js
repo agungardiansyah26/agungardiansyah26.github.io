@@ -99,37 +99,19 @@ themeToggle.addEventListener("click", () => {
 const langIdBtn = document.getElementById("lang-id");
 const langEnBtn = document.getElementById("lang-en");
 
-function sanitizeHTML(html) {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
-
-  dangerousTags.forEach(tag => {
-    const elements = doc.querySelectorAll(tag);
-    elements.forEach(el => el.remove());
-  });
-
-  doc.querySelectorAll('*').forEach(el => {
-    Array.from(el.attributes).forEach(attr => {
-      if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().includes('javascript:')) {
-        el.removeAttribute(attr.name);
-      }
-    });
-  });
-
-  return doc.body.innerHTML;
-}
-
 function getNestedTranslation(obj, path) {
   return path.split('.').reduce((prev, curr) => {
     return prev ? prev[curr] : null;
   }, obj);
 }
 
+// ⚡ Bolt Optimization: Reuse DOMParser instance to avoid instantiation overhead
+const htmlParser = new DOMParser();
+
 // 🛡️ Sentinel: Sanitize HTML to prevent DOM-based XSS
 function sanitizeHTML(html) {
   if (!html) return '';
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
+  const doc = htmlParser.parseFromString(html, 'text/html');
   const dangerousTags = ['script', 'iframe', 'object', 'embed'];
 
   const sanitizeNode = (node) => {
@@ -164,9 +146,13 @@ function sanitizeHTML(html) {
   return doc.body.innerHTML;
 }
 
+// ⚡ Bolt Optimization: Cache translation elements to prevent redundant DOM traversals
+const i18nElements = document.querySelectorAll("[data-i18n]");
+const i18nPlaceholderElements = document.querySelectorAll("[data-i18n-placeholder]");
+
 function updateContent(lang) {
   // Update text content
-  document.querySelectorAll("[data-i18n]").forEach((element) => {
+  i18nElements.forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {
@@ -175,7 +161,7 @@ function updateContent(lang) {
   });
 
   // Update placeholders
-  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+  i18nPlaceholderElements.forEach((element) => {
     const key = element.getAttribute("data-i18n-placeholder");
     const translation = getNestedTranslation(translations[lang], key);
     if (translation) {

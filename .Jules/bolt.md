@@ -9,3 +9,7 @@
 ## 2026-03-28 - [Active Navigation Link Scroll Optimization]
 **Learning:** Using an `IntersectionObserver` that iterates over a `NodeList` and updates DOM `classList` for every entry continuously leads to excessive DOM mutation, thrashing, and performance degradation during scrolling.
 **Action:** Use a `Map` to cache the relation between section IDs and anchor links (`O(1)` lookups). Additionally, keep track of `currentActiveLinks` and only mutate the DOM (`classList.add/remove`) when the actual active section changes to drastically reduce redundant operations.
+
+## 2026-04-21 - [i18n Parsing and Traversal Optimization]
+**Learning:** Re-instantiating `DOMParser` and querying the DOM for translation elements on every language toggle introduces significant layout thrashing and computational overhead during continuous user interactions.
+**Action:** Cache DOM queries for dynamic elements outside the update loop and reuse a single `DOMParser` instance globally to avoid redundant instantiation and tree-walking penalties.
