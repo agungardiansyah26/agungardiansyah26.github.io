@@ -99,43 +99,41 @@ themeToggle.addEventListener("click", () => {
 const langIdBtn = document.getElementById("lang-id");
 const langEnBtn = document.getElementById("lang-en");
 
-function sanitizeHTML(html) {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
-
-  dangerousTags.forEach(tag => {
-    const elements = doc.querySelectorAll(tag);
-    elements.forEach(el => el.remove());
-  });
-
-  doc.querySelectorAll('*').forEach(el => {
-    Array.from(el.attributes).forEach(attr => {
-      if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().includes('javascript:')) {
-        el.removeAttribute(attr.name);
-      }
-    });
-  });
-
-  return doc.body.innerHTML;
-}
-
 function getNestedTranslation(obj, path) {
   return path.split('.').reduce((prev, curr) => {
     return prev ? prev[curr] : null;
   }, obj);
 }
 
-// 🛡️ Sentinel: Sanitize HTML to prevent DOM-based XSS
+// 🛡️ Sentinel: Sanitize HTML to prevent DOM-based XSS using an allowlist approach
+const domParserInstance = new DOMParser();
+const allowedTags = ['br', 'span', 'strong', 'em', 'p', 'b', 'i', 'a'];
+const allowedAttrs = ['class', 'href', 'target', 'rel'];
+const dangerousTags = ['script', 'iframe', 'object', 'embed', 'svg'];
+
 function sanitizeHTML(html) {
   if (!html) return '';
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  const dangerousTags = ['script', 'iframe', 'object', 'embed'];
+  const doc = domParserInstance.parseFromString(html, 'text/html');
 
   const sanitizeNode = (node) => {
+    // Process children first
+    for (let i = node.childNodes.length - 1; i >= 0; i--) {
+      sanitizeNode(node.childNodes[i]);
+    }
+
     if (node.nodeType === Node.ELEMENT_NODE) {
       const tagName = node.tagName.toLowerCase();
+
       if (dangerousTags.includes(tagName)) {
+        node.remove();
+        return;
+      }
+
+      if (!allowedTags.includes(tagName)) {
+        // Hoist children
+        while (node.firstChild) {
+          node.parentNode.insertBefore(node.firstChild, node);
+        }
         node.remove();
         return;
       }
@@ -146,14 +144,10 @@ function sanitizeHTML(html) {
         const name = attr.name.toLowerCase();
         const value = attr.value.trim().toLowerCase();
 
-        if (name.startsWith('on') || value.startsWith('javascript:')) {
+        if (!allowedAttrs.includes(name) || value.startsWith('javascript:') || value.startsWith('data:')) {
           node.removeAttribute(attr.name);
         }
       }
-    }
-
-    for (let i = node.childNodes.length - 1; i >= 0; i--) {
-      sanitizeNode(node.childNodes[i]);
     }
   };
 
