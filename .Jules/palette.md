@@ -23,3 +23,7 @@
 ## 2024-05-25 - Hiding purely decorative elements from screen readers
 **Learning:** Screen readers announce every text node within interactive elements, including text symbols used purely for visual decoration (e.g., '↗' or '↓' arrows or `|` dividers).
 **Action:** Always add `aria-hidden="true"` to purely decorative `span` elements and SVG icons to ensure clean, focused screen reader announcements and prevent confusing descriptions.
+
+## 2026-04-20 - Interactive Element Accessibility
+**Learning:** Interactive elements need clear `:focus-visible` outlines for keyboard navigation and distinct `:disabled` states to indicate when actions are unavailable.
+**Action:** Ensure all interactive elements have `:focus-visible` styling and `:disabled` states are clearly distinguishable.
