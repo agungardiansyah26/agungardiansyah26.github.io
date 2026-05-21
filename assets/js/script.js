@@ -99,8 +99,15 @@ themeToggle.addEventListener("click", () => {
 const langIdBtn = document.getElementById("lang-id");
 const langEnBtn = document.getElementById("lang-en");
 
+// ⚡ Bolt Optimization: Cache translation path splits to avoid redundant string allocations
+const pathCache = new Map();
+
 function getNestedTranslation(obj, path) {
-  return path.split('.').reduce((prev, curr) => {
+  if (!pathCache.has(path)) {
+    pathCache.set(path, path.split('.'));
+  }
+  const keys = pathCache.get(path);
+  return keys.reduce((prev, curr) => {
     return prev ? prev[curr] : null;
   }, obj);
 }
