@@ -142,9 +142,10 @@ function sanitizeHTML(html) {
       for (let i = attrs.length - 1; i >= 0; i--) {
         const attr = attrs[i];
         const name = attr.name.toLowerCase();
-        const value = attr.value.trim().toLowerCase();
+        // Strip whitespace and control characters to prevent protocol bypasses
+        const cleanValue = attr.value.toLowerCase().replace(/[\s\x00-\x1F\x7F-\x9F]/g, '');
 
-        if (!allowedAttrs.includes(name) || value.startsWith('javascript:') || value.startsWith('data:')) {
+        if (!allowedAttrs.includes(name) || cleanValue.startsWith('javascript:') || cleanValue.startsWith('data:') || cleanValue.startsWith('vbscript:')) {
           node.removeAttribute(attr.name);
         }
       }
