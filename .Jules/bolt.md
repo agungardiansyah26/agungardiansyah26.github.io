@@ -9,3 +9,7 @@
 ## 2026-03-28 - [Active Navigation Link Scroll Optimization]
 **Learning:** Using an `IntersectionObserver` that iterates over a `NodeList` and updates DOM `classList` for every entry continuously leads to excessive DOM mutation, thrashing, and performance degradation during scrolling.
 **Action:** Use a `Map` to cache the relation between section IDs and anchor links (`O(1)` lookups). Additionally, keep track of `currentActiveLinks` and only mutate the DOM (`classList.add/remove`) when the actual active section changes to drastically reduce redundant operations.
+
+## 2026-04-03 - [Translation Path Caching]
+**Learning:** Frequent lookups in deeply nested translation objects using `path.split('.')` trigger redundant string allocations and array creations, leading to measurable layout thrashing when switching languages.
+**Action:** Memoize string paths into a global `Map` so that the expensive string operations and array allocations are done only once per unique path key, converting an O(N) lookup overhead to O(1) across toggles.
