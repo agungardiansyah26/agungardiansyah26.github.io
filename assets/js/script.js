@@ -238,6 +238,16 @@ if (contactForm) {
     // Loading State
     btn.disabled = true;
     if (btnTextSpan) btnTextSpan.textContent = t('contact.form.btn_sending');
+
+    // Add spinner and lock inputs
+    const btnIcon = btn.querySelector('.btn-icon');
+    if (btnIcon) {
+      btnIcon.textContent = '↻';
+      btnIcon.classList.add('spin');
+    }
+    const inputs = contactForm.querySelectorAll('.input-field');
+    inputs.forEach(input => input.disabled = true);
+
     statusDiv.textContent = '';
     statusDiv.style.color = '';
 
@@ -265,6 +275,15 @@ if (contactForm) {
       // Reset button
       btn.disabled = false;
       if (btnTextSpan) btnTextSpan.textContent = t('contact.form.btn_send');
+
+      // Remove spinner and unlock inputs
+      const btnIcon = btn.querySelector('.btn-icon');
+      if (btnIcon) {
+        btnIcon.textContent = '✈';
+        btnIcon.classList.remove('spin');
+      }
+      const inputs = contactForm.querySelectorAll('.input-field');
+      inputs.forEach(input => input.disabled = false);
     }
   });
 }
