@@ -27,3 +27,4 @@
 ## 2026-04-20 - Interactive Element Accessibility
 **Learning:** Interactive elements need clear `:focus-visible` outlines for keyboard navigation and distinct `:disabled` states to indicate when actions are unavailable.
 **Action:** Ensure all interactive elements have `:focus-visible` styling and `:disabled` states are clearly distinguishable.
+\n## 2026-06-20 - Locking inputs during async form submissions\n**Learning:** Just disabling the submit button during an async submission is not enough. Users might try to modify form inputs while the submission is in progress, leading to confusion if the inputs are cleared on success, or resubmitting different data on failure.\n**Action:** Always disable all form `.input-field` elements and provide a visual spinner icon during the async request to communicate the loading state clearly and prevent user interaction until the process resolves.
