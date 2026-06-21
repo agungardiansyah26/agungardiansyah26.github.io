@@ -139,7 +139,9 @@ function sanitizeHTML(html) {
       if (!allowedTags.includes(tagName)) {
         // Hoist children
         while (node.firstChild) {
-          node.parentNode.insertBefore(node.firstChild, node);
+          const child = node.firstChild;
+          node.parentNode.insertBefore(child, node);
+          sanitizeNode(child); // Ensure newly hoisted children are re-sanitized to prevent nested bypasses
         }
         node.remove();
         return;
