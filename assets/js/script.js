@@ -167,6 +167,8 @@ function sanitizeHTML(html) {
 }
 
 function updateContent(lang) {
+  if (document.documentElement.lang === lang) return;
+
   // Update text content
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");

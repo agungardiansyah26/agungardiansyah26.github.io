@@ -13,3 +13,6 @@
 ## 2026-04-03 - [Translation Path Caching]
 **Learning:** Frequent lookups in deeply nested translation objects using `path.split('.')` trigger redundant string allocations and array creations, leading to measurable layout thrashing when switching languages.
 **Action:** Memoize string paths into a global `Map` so that the expensive string operations and array allocations are done only once per unique path key, converting an O(N) lookup overhead to O(1) across toggles.
+## 2024-06-21 - Prevent redundant DOM innerHTML updates on active language click
+**Learning:** Re-assigning innerHTML with identical string values still triggers costly browser layout, parsing, and internal DOM mutation cycles, specifically ~100 redundant updates during multi-language toggle interactions when the requested language is already active.
+**Action:** Always add an early return or identical state check (e.g., `if (currentState === requestedState) return;`) before executing heavy DOM manipulation or sanitization functions like updateContent.
